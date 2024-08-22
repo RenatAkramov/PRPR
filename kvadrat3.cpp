@@ -1,3 +1,13 @@
+/*!
+    @file   main.cpp
+
+    @author Renat
+    @date   22/08/2024
+    @brief  solver
+
+*/
+
+
 #include <stdio.h>
 #include <math.h>
 #include <TXLib.h>
@@ -11,7 +21,12 @@ enum Eroot
     WRONG      =  1,
     OKEY       =  0
 };
-
+/*!
+*    @brief Структура с коэфициентами уравнений
+*    @param a  Первый коэфициент уравнений
+*    @param b  Второй коэфициент уравнения
+*    @param c  Третий корень уравнения
+*/
 struct uravnenie
 {
     double a;
@@ -19,30 +34,56 @@ struct uravnenie
     double c;
 };
 
-//////////////////////////////////////////////////////////////////////////
-///\brief  This metod solves square cnatches
-///\param uravnenie contains coefficients
-///\param x_1 The first root
-///\param x_2 The second root
-///\
-///
-///
-//////////////////////////////////////////////////////////////////////////
-int SolveSquare(struct uravnenie, double* x_1, double* x_2);
+/*!  @brief                Структура с данными для тестов
+*    @param a              Первый коэф уравнений
+*    @param b              Второй коэфициент уравнения
+*    @param c              Третий коэфициет уравнения
+*    @param x1Expected     Ожидаемый первый корень
+*    @param x2Expected     Ожидаемый второй корень
+*    @param nRootsExpeted  Ожидаемое количество корней
+*/
+struct testiki
+{
+    int nTest;
+    double a;
+    double b;
+    double c;
+    double x1Expected;
+    double x2Expected;
+    int nRootsExpected;
+};
 
-int RunTests(int nTest, double a, double b, double c,double x1Expected, double x2Expected, int nRootsExpected);
 
-int sravnenie(double a);
+int SolveSquare(struct uravnenie tom, double* x_1, double* x_2);
+
+int RunTests(struct testiki tests);
 
 int sravneniedvuh(double a, double b);
 
-void checktest();
+int checktest(const testiki* test);
 
+/*!
+*    @brief Основная функция, принимает значение из функции решения уравнения, значение корней и выдает их пользователю
+*    @return Корни
+*/
 int main()
 {
-     int nachalo = 0;
+     struct testiki Tests1 = {1, 1,4,-5,-5,1,2};
+     struct testiki Tests2 = {2,2,0,0,0,0,1};
+     struct testiki Tests3 = {3,0,0,0,0,0,-1};
+     struct testiki Tests4 = {4,0,2,0,0,0,1};
+     struct testiki Tests5 = {5,1,-5,6,2,3,2};
+     struct testiki Tests6 = {6,3,1,2,0,0,0};
+     struct testiki Tests7 = {7,-1,1,0,1,0,2};
+     struct testiki Tests8 = {8,0,0,1,0,0,-1};
+     struct testiki tests[8] = {Tests1, Tests2, Tests3, Tests4, Tests5, Tests6, Tests7, Tests8};
+
+     int nachalo = 0, pravilnost = 0;
+
      printf("Для решения уравнения нажмите 1 \nДля проведения тестов нажмите 2\n");
+
      scanf("%d", &nachalo);
+
      if (nachalo == 1)
      {
         printf("Введите коэфициенты\n");
@@ -88,12 +129,21 @@ int main()
     }
     if (nachalo ==2)
     {
-        checktest();
-        printf("Ok");
+        pravilnost = checktest(&tests[0]);
+        if (pravilnost == OKEY)
+        {
+            printf("Все тесты пройдены верно");
+        }
         return 1;
     }
 }
 
+/*!
+*    @brief Определяет количество корней и решает уравнение
+*    @param uravnenie Струкура с коэфициентами уравнения
+*    @param x_1 Первый корень
+*    @param x_2 Второй корень
+*/
 int SolveSquare(uravnenie tom, double* x_1, double* x_2)
 {
     double d = 0, smena = 0;
@@ -152,11 +202,16 @@ int SolveSquare(uravnenie tom, double* x_1, double* x_2)
                     return 2;
                 }
         }
+
     }
-return 0;
+    return 0;
 }
 
-
+/*!
+*    @brief Сравнивает 2 нецелочисленных числа
+*    @param a Первое число
+*    @param b Второе число
+*/
 int sravneniedvuh(double a, double b)
 {
     const double smal = 0.000000001;
@@ -170,21 +225,51 @@ int sravneniedvuh(double a, double b)
     }
 }
 
-
-
-int RunTests(int nTest, double a, double b, double c, double x1Expected, double x2Expected, int nRootsExpected)
+/*!
+*    @brief Функция запускающая тесты
+*    @param Tests1 первый тест
+*    @param Tests2 второй тест
+*    @param Tests3 третий тест
+*    @param Tests4 четвертый тест
+*    @param Tests5 пятый тест
+*    @param Tests6 шестой тест
+*    @param Tests7 седьмой тест
+*    @param Tests8 восьмой тест
+*/
+int checktest( const testiki* tests)
 {
+    int n = 0;
+
+    for(int i = 0; i < 8; i++)
+    {
+        n = RunTests(tests[i]);
+    }
+    return n;
+}
+
+/*!
+*    @brief Функция описывающая тесты
+*    @param nTest   номер теста
+*    @param а       первый коэфициент уравнения
+*    @param x_2     Второй корень
+*/
+int RunTests(struct testiki test)
+{
+    //printf("[%lg]\n", test.a);
     struct uravnenie tomt;
-    tomt.a = a, tomt.b = b, tomt.c = c;
+    tomt.a = test.a;
+    tomt.b = test.b;
+    tomt.c = test.c;
 
     double x1t = 0, x2t = 0;
 
-    int nRootst = SolveSquare(tomt, &x1t, &x2t);
+    int nRootsT = SolveSquare(tomt, &x1t, &x2t);
 
-    if (sravneniedvuh(nRootst, nRootsExpected) == 0 || sravneniedvuh(x1t, x1Expected) == 0 || sravneniedvuh(x2t, x2Expected) == 0)
+    if (sravneniedvuh(nRootsT, test.nRootsExpected) == 0 || sravneniedvuh(x1t, test.x1Expected) == 0 || sravneniedvuh(x2t, test.x2Expected) == 0)
     {
-        printf("ERROR TEST %d, a = %g, b = %g, c = %g, x1= %lg, x2 =%lg\n"
-               "Expected x1 = %lg, x2 = %lg\n",nTest, a, b, c, x1t, x2t, x1Expected, x2Expected);
+        printf("ERROR TEST %d, a = %lg, b = %lg, c = %lg, x1= %lg, x2 =%lg\n"
+               "Expected x1 = %lg, x2 = %lg\n",
+                test.nTest, test.a, test.b, test.c, x1t, x2t, test.x1Expected, test.x2Expected);
         return WRONG;
     }
     else
@@ -193,17 +278,6 @@ int RunTests(int nTest, double a, double b, double c, double x1Expected, double 
     }
 }
 
-void checktest()
-{
-    RunTests(1,1,4,-5,-5,1,2);
-    RunTests(2,2,0,0,0,0,1);
-    RunTests(3,0,0,0,0,0,-1);
-    RunTests(4,0,2,0,0,0,1);
-    RunTests(5,1,-5,6,2,3,2);
-    RunTests(6,3,1,2,0,0,0);
-    RunTests(7,-1,1,0,1,0,2);
-    RunTests(8,0,0,1,0,0,-1);
-}
 
 
 
